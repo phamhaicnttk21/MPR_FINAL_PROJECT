@@ -68,6 +68,7 @@ function LogInScreen({navigation}) {
                     buttonStyle={styles.control}
                     onPress={logIn}
                 />
+
             </View>
         </View>
     );

@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import {Button} from 'react-native-elements';
 
 function WelcomeScreen({navigation}) {
@@ -21,6 +21,7 @@ function WelcomeScreen({navigation}) {
                     onPress={() => navigation.navigate('Sign Up')}
                 />
             </View>
+            
         </View>
     );
 }
