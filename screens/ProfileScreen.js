@@ -1,22 +1,36 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ImageBackground,
-} from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground} from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { doc, setDoc, getFirestore, collection } from 'firebase/firestore';
+
+
 
 const ProfileScreen = () => {
+
+  
   const [name, setName] = useState('Alexa');
   const [email, setEmail] = useState('email@gmail.com');
   const [age, setAge] = useState('30');
   const [work, setWork] = useState('Developer');
   const [address, setAddress] = useState('123 Street, City');
   const [avatar, setAvatar] = useState(require('../assets/img/tomcruise.jpg')); // Make sure you have this image in your assets
+  
+  
+
+  async function writeUserDatabase(userId, name, email) {
+    const db = getFirestore();
+  
+    try {
+      await setDoc(doc(db, 'users', userId), {
+        username: name,
+        email: email,
+      });
+    } catch (error) {
+      console.error("Error writing document: ", error);
+    }
+  }
+
+  
 
   const selectAvatar = () => {
     const options = {
@@ -36,8 +50,25 @@ const ProfileScreen = () => {
     });
   };
 
-  const updateProfile = () => {
-    Alert.alert('Profile Updated', 'Your profile information has been updated successfully.');
+  const updateProfile = (userId) => {
+    
+
+    writeUserDatabase(userId, name, email);
+
+    const db = getFirestore();
+    const docRef = doc(db, 'users', userId);
+
+    getDoc(docRef).then((doc) => {
+      if (doc.exists()) {
+        Alert.alert('Profile Updated', `Your profile information has been updated successfully.`);
+      } else {
+        console.log("No data available");
+      }
+    }).catch((error) => {
+      console.error(error);
+    });
+
+    
   };
 
   return (

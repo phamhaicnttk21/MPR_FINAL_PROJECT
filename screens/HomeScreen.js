@@ -7,6 +7,7 @@ import { DateTime } from "luxon";
 let loginDays = [];
 
 function HomeScreen({navigation}) {
+
     const dailyRewardButton = [{
         icon: require("../assets/icons/dailyRewardButtonIcon.png"),        
         name: "log_in_reward_button",
