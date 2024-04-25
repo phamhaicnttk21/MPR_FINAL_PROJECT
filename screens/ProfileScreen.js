@@ -16,7 +16,7 @@ const ProfileScreen = () => {
   const [age, setAge] = useState('30');
   const [work, setWork] = useState('Developer');
   const [address, setAddress] = useState('123 Street, City');
-  const [avatar, setAvatar] = useState(require('./img/tomcruise.jpg')); // Make sure you have this image in your assets
+  const [avatar, setAvatar] = useState(require('../assets/img/tomcruise.jpg')); // Make sure you have this image in your assets
 
   const selectAvatar = () => {
     const options = {
@@ -42,7 +42,7 @@ const ProfileScreen = () => {
 
   return (
     <ImageBackground
-      source={require('./img/tomcruise.jpg')}
+      source={require('../assets/img/tomcruise.jpg')}
       style={styles.background}
     >
       <View style={styles.overlay}>

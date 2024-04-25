@@ -1,12 +1,12 @@
 import { StatusBar } from "expo-status-bar";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Button } from "react-native";
 import { FloatingAction } from "react-native-floating-action";
 import Toast from "react-native-root-toast";
 import { DateTime } from "luxon";
 
 let loginDays = [];
 
-function HomeScreen() {
+function HomeScreen({navigation}) {
     const dailyRewardButton = [{
         icon: require("../assets/icons/dailyRewardButtonIcon.png"),        
         name: "log_in_reward_button",
@@ -46,6 +46,12 @@ function HomeScreen() {
                 iconWidth={30}
                 listenKeyboard={true}
             />  
+
+            {/*Go to Profile screen */}
+            <Button
+                title="Go to profile screen"
+                onPress={() => navigation.navigate('Profile')}
+            />
         </View>
     );
 }
