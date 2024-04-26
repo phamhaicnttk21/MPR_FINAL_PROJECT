@@ -2,26 +2,28 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground} from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { doc, setDoc, getFirestore, collection, getDoc } from 'firebase/firestore';
+import { getAuth } from "firebase/auth";
 
-
+const auth = getAuth();
 
 const ProfileScreen = () => {
 
-  
-  const [name, setName] = useState('Hien');
+  const [userId, setUserId] = useState(null);
+
+  const [name, setName] = useState('Test');
   const [email, setEmail] = useState('email@gmail.com');
   const [age, setAge] = useState('30');
   const [avatar, setAvatar] = useState(require('../assets/img/tomcruise.jpg')); // Make sure you have this image in your assets
   
   
 
-  async function writeUserDatabase(userId, name, email) {
+  async function writeUserDatabase() {
     const db = getFirestore();
   
     try {
-      await setDoc(doc(db, 'users', name), {
-        username: name,
-        email: email,
+      await setDoc(doc(db, 'users', auth.currentUser.email), {
+        name: name,
+        email: auth.currentUser.email,
       });
     } catch (error) {
       console.error("Error writing document: ", error);
@@ -51,10 +53,12 @@ const ProfileScreen = () => {
   const updateProfile = (userId) => {
     
 
-    writeUserDatabase(userId, name, email);
+    writeUserDatabase();
 
     const db = getFirestore();
-    const docRef = doc(db, 'users', name);
+
+    
+    const docRef = doc(db, 'users', auth.currentUser.email);
 
     getDoc(docRef).then((doc) => {
       if (doc.exists()) {
@@ -65,7 +69,7 @@ const ProfileScreen = () => {
     }).catch((error) => {
       console.error(error);
     });
-
+    
     
   };
 
