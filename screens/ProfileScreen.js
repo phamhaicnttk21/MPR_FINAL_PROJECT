@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground} from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { doc, setDoc, getFirestore, collection } from 'firebase/firestore';
+import { doc, setDoc, getFirestore, collection, getDoc } from 'firebase/firestore';
 
 
 
 const ProfileScreen = () => {
 
   
-  const [name, setName] = useState('Alexa');
+  const [name, setName] = useState('Hien');
   const [email, setEmail] = useState('email@gmail.com');
   const [age, setAge] = useState('30');
-  const [work, setWork] = useState('Developer');
-  const [address, setAddress] = useState('123 Street, City');
   const [avatar, setAvatar] = useState(require('../assets/img/tomcruise.jpg')); // Make sure you have this image in your assets
   
   
@@ -21,7 +19,7 @@ const ProfileScreen = () => {
     const db = getFirestore();
   
     try {
-      await setDoc(doc(db, 'users', userId), {
+      await setDoc(doc(db, 'users', name), {
         username: name,
         email: email,
       });
@@ -56,7 +54,7 @@ const ProfileScreen = () => {
     writeUserDatabase(userId, name, email);
 
     const db = getFirestore();
-    const docRef = doc(db, 'users', userId);
+    const docRef = doc(db, 'users', name);
 
     getDoc(docRef).then((doc) => {
       if (doc.exists()) {
@@ -91,11 +89,6 @@ const ProfileScreen = () => {
           <Text style={styles.label}>Age</Text>
           <Text style={styles.input}>{age}</Text>
 
-          <Text style={styles.label}>Work</Text>
-          <Text style={styles.input}>{work}</Text>
-
-          <Text style={styles.label}>Address</Text>
-          <Text style={styles.input}>{address}</Text>
         </View>
 
         <TouchableOpacity style={styles.button} onPress={updateProfile}>
