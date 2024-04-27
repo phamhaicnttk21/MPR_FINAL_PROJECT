@@ -20,7 +20,7 @@ function AuthStack() {
                 <Stack.Screen name = "Home" component={HomeScreen}/>
                 <Stack.Screen name='Profile'
                     component={ProfileScreen}
-                    options={{title:'Profile'}}
+                    options={{title:'Create Profile'}}
                 />
                 <Stack.Screen 
                     name='EditProfile'

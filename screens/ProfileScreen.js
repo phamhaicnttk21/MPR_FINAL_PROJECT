@@ -6,9 +6,10 @@ import { getAuth } from "firebase/auth";
 import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
+
 const auth = getAuth();
 
-const ProfileScreen = () => {
+const ProfileScreen = ({navigation}) => {
 
   const [userId, setUserId] = useState(null);
 
@@ -36,8 +37,6 @@ const ProfileScreen = () => {
     }
   }
 
-  
-
   const selectAvatar = () => {
     const options = {
       mediaType: 'photo',
@@ -57,17 +56,16 @@ const ProfileScreen = () => {
   };
 
   const updateProfile = (userId) => {
-    
-
     writeUserDatabase();
 
     const db = getFirestore();
-
     const docRef = doc(db, 'users', auth.currentUser.email);
-
     getDoc(docRef).then((doc) => {
       if (doc.exists()) {
-        Alert.alert('Profile Updated', `Your profile information has been updated successfully.`);
+        Alert.alert('Profile Updated', 
+        `Your profile information has been updated successfully.`,
+        [{text:'Start Game', onPress: () => {navigation.navigate('Home')}}],
+      );
       } else {
         console.log(`Can't create profile`);
       }
