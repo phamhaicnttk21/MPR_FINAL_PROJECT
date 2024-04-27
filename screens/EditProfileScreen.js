@@ -16,10 +16,10 @@ const EditProfileScreen = ({ route, navigation }) => {
   const [work, setWork] = useState(initialData.work);
   const [address, setAddress] = useState(initialData.address);
 
-  const updateProfile = () => {
+  function updateProfile (){
     // Here you can update the profile information, for example, sending it to a server
     // You can replace this alert with actual logic to update the profile
-    Alert.alert('Profile Updated', 'Your profile information has been updated successfully.');
+    // Alert.alert('Profile Updated', 'Your profile information has been updated successfully.');
   };
 
   return (
@@ -71,9 +71,9 @@ const EditProfileScreen = ({ route, navigation }) => {
         placeholderTextColor="#666"
       />
 
-      <TouchableOpacity style={styles.button} onPress={updateProfile}>
+      {/* <TouchableOpacity style={styles.button} onPress={updateProfile}>
         <Text style={styles.buttonText}>Update Profile</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };
