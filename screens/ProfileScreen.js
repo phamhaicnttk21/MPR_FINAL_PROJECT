@@ -4,6 +4,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { doc, setDoc, getFirestore, collection, getDoc } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
 
+
 const auth = getAuth();
 
 const ProfileScreen = () => {

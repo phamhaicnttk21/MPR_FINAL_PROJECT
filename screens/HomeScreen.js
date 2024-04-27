@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, Button } from "react-native";
 import { FloatingAction } from "react-native-floating-action";
 import Toast from "react-native-root-toast";
 import { DateTime } from "luxon";
-
+import BackgroundMusic from "../components/BackgroundMusic";
+import SoundButton from "../components/SoundButton";
+import RewardedSound from "../components/RewardedSound";
 let loginDays = [];
 
 function HomeScreen({navigation}) {
-
+    const playRewardSound = RewardedSound();
     const dailyRewardButton = [{
         icon: require("../assets/icons/dailyRewardButtonIcon.png"),        
         name: "log_in_reward_button",
@@ -17,6 +19,7 @@ function HomeScreen({navigation}) {
     return(
         <View style={styles.container}>
             <StatusBar style="auto"/>
+            {/* <BackgroundMusic /> */}
             <Text>Home Screen!</Text>  
 
             <Text>Welcome!</Text>  
@@ -29,6 +32,7 @@ function HomeScreen({navigation}) {
                 actions={dailyRewardButton}         
                 onPressItem={
                     () => {
+                            playRewardSound();
                             today = DateTime.now().toLocaleString();
                             console.log(today);
                             if (!loginDays.includes(today)) {
@@ -49,9 +53,13 @@ function HomeScreen({navigation}) {
             />  
 
             {/*Go to Profile screen */}
-            <Button
+            <SoundButton
                 title="Go to profile screen"
                 onPress={() => navigation.navigate('Profile')}
+            />
+            <SoundButton
+                title="Go to settings screen"
+                onPress={() => navigation.navigate('Settings')}
             />
         </View>
     );

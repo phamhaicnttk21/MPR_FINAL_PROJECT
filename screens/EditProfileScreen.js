@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import SoundButton from '../components/SoundButton';
 
 const EditProfileScreen = ({ route, navigation }) => {
   const { initialData } = route.params;
@@ -71,9 +72,9 @@ const EditProfileScreen = ({ route, navigation }) => {
         placeholderTextColor="#666"
       />
 
-      <TouchableOpacity style={styles.button} onPress={updateProfile}>
+      <SoundButton style={styles.button} onPress={updateProfile}>
         <Text style={styles.buttonText}>Update Profile</Text>
-      </TouchableOpacity>
+      </SoundButton>
     </View>
   );
 };
