@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'; // Assuming you're using Expo for vector icons
 import { dummyData } from '../dummyData';
+import { doc, getFirestore, setDoc } from 'firebase/firestore';
 
 const { height } = Dimensions.get('window');
 
@@ -12,6 +13,58 @@ const Aspect = () => {
   const [loading, setLoading] = useState(true);
   const menuAnimation = useRef(new Animated.Value(-height / 2)).current;
 
+
+ 
+
+  async function writeUserDatabase() {
+    const db = getFirestore();
+    try {
+    await setDoc (doc (db, 'users', auth.currentUser.email), {
+    
+    name: name,
+    email: auth.currentUser.email,
+    gender: gender,
+    
+  })} catch (error) {
+    console.error("Error writing document: ", error);
+    }
+  }
+
+  async function updateUserPoints(option) {
+    try {
+      const user = firebase.auth().currentUser;
+      const uid = user ? user.uid : null;
+  
+      if (uid) {
+        const userRef = firebase.firestore().doc(users/$,{uid});
+        const userDoc = await userRef.get();
+  
+        if (userDoc.exists) {
+          // Update the existing user document with the new points
+          await userRef.update({
+            happiness: userDoc.data().happiness + option.happiness,
+            intelligence: userDoc.data().intelligence + option.intelligencePoints,
+            charisma: userDoc.data().charisma + option.charismaPoints,
+            // Add other attributes as needed
+          });
+        } else {
+          // Create a new user document with the initial points
+          await userRef.set({
+            happiness: option.happiness,
+            intelligence: option.intelligencePoints,
+            charisma: option.charismaPoints,
+            // Add other attributes as needed
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error updating user points:', error);
+    }
+  }
+
+  
+
+  
   useEffect(() => {
     setLoading(false);
   }, []);
@@ -85,14 +138,6 @@ const Aspect = () => {
     setSelectedOptions(selectedOptions.filter(optionId => optionId !== id));
   };
 
-  const showAllOptions = () => {
-    setShowMenu('all');
-    Animated.timing(menuAnimation, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex(currentIndex => (currentIndex + 1) % dummyData.ageoptions.length);
@@ -100,6 +145,46 @@ const Aspect = () => {
 
     return () => clearInterval(interval);
   }, []);
+  const handleOptionPress = async (option) => {
+    try {
+      const user = firebase.auth().currentUser;
+      const uid = user ? user.uid : null;
+  
+      if (uid) {
+        const userRef = firebase.firestore().doc(users/$,{uid});
+        const userDoc = await userRef.get();
+  
+        let updatedData = {};
+  
+        if (userDoc.exists) {
+          // Update the existing user document with the new points
+          const { happiness, intelligence, charisma } = userDoc.data();
+          updatedData = {
+            happiness: happiness + option.happiness,
+            intelligence: intelligence + option.intelligencePoints,
+            charisma: charisma + option.charismaPoints,
+            selectedOptions: [...userDoc.data().selectedOptions, option.id], // Add the selected option ID to the array
+          };
+        } else {
+          // Create a new user document with the initial points
+          updatedData = {
+            happiness: option.happiness,
+            intelligence: option.intelligencePoints,
+            charisma: option.charismaPoints,
+            selectedOptions: [option.id], // Initialize the array with the selected option ID
+          };
+        }
+  
+        await userRef.set(updatedData, { merge: true });
+      }
+    } catch (error) {
+      console.error('Error updating user points:', error);
+    }
+  };
+  const handlePress = async () => {
+    await updateUserPoints(option);
+    onPress();
+  };
 
   return (
     <View style={styles.wrap}>
@@ -131,19 +216,18 @@ const Aspect = () => {
           <TouchableOpacity style={styles.activities} onPress={() => toggleMenu('activities')}>
             <Text style={styles.activitiesText}>Activities</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.allOptionsButton} onPress={showAllOptions}>
-            <Text style={styles.allOptionsText}>Show All</Text>
-          </TouchableOpacity>
         </View>
       </View>
       <Animated.View style={[styles.menuContainer, { transform: [{ translateY: menuAnimation }] }]}>
         {showMenu === 'all' ? (
           <View style={styles.menuContent}>
-            {dummyData.career.map((option) => (
-              <Text key={option.id} style={styles.menuOptionText}>
-                {option.option}
-              </Text>
-            ))}
+          {options.map((option) => (
+        <OptionButton
+          key={option.id}
+          option={option}
+          onPress={() => handleOptionPress(option)}
+        />
+      ))}
             {dummyData.social.map((option) => (
               <Text key={option.id} style={styles.menuOptionText}>
                 {option.option}
@@ -277,9 +361,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   indexWrap: {
-    marginTop: 100,
+    marginTop: 10,
     flexDirection: 'column',
     alignItems: 'flex-start',
+
   },
   attributeContainer: {
     flexDirection: 'row',
