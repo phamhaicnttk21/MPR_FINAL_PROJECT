@@ -6,47 +6,51 @@ import { DateTime } from "luxon";
 
 let loginDays = [];
 
-function HomeScreen({navigation}) {
+function HomeScreen({ navigation }) {
 
     const dailyRewardButton = [{
-        icon: require("../assets/icons/dailyRewardButtonIcon.png"),        
+        icon: require("../assets/icons/dailyRewardButtonIcon.png"),
         name: "log_in_reward_button",
         position: 1,
     }]
 
-    return(
+    return (
         <View style={styles.container}>
-            <StatusBar style="auto"/>
-            <Text>Home Screen!</Text>  
+            <StatusBar style="auto" />
+            <Text>Home Screen!</Text>
 
-            <Text>Welcome!</Text>  
+            <Text>Welcome!</Text>
+
+            <TouchableOpacity style={styles.button} onPress={handlePlayGame}>
+                <Text style={styles.buttonText}>Play game</Text>
+            </TouchableOpacity>
 
             {/*daily reward button*/}
             {/*TO DO: Implement: +50k vnd in onPressItem
                       Recognize different users  */}
-                      
+
             <FloatingAction
-                actions={dailyRewardButton}         
+                actions={dailyRewardButton}
                 onPressItem={
                     () => {
-                            today = DateTime.now().toLocaleString();
-                            console.log(today);
-                            if (!loginDays.includes(today)) {
-                                Toast.show('daily Reward: 500k vnd!', {duration:Toast.durations.LONG},);
-                                loginDays.push(today);
-                            } else {
-                                Toast.show('daily Rewards claimed', {duration:Toast.durations.LONG})
-                            }
-                            console.log(loginDays)
+                        today = DateTime.now().toLocaleString();
+                        console.log(today);
+                        if (!loginDays.includes(today)) {
+                            Toast.show('daily Reward: 500k vnd!', { duration: Toast.durations.LONG },);
+                            loginDays.push(today);
+                        } else {
+                            Toast.show('daily Rewards claimed', { duration: Toast.durations.LONG })
                         }
+                        console.log(loginDays)
+                    }
                 }
-                overrideWithAction = {true}
-                color= "#ADD8E6"
+                overrideWithAction={true}
+                color="#ADD8E6"
                 buttonSize={60}
                 iconHeight={30}
                 iconWidth={30}
                 listenKeyboard={true}
-            />  
+            />
         </View>
     );
 }
@@ -55,9 +59,9 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-  });
+});

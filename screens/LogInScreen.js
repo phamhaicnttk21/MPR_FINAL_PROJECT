@@ -31,7 +31,7 @@ function LogInScreen({navigation}) {
             const docRef = doc(db, 'users', auth.currentUser.email);
             getDoc(docRef).then((doc) => {
             if (doc.exists()) {
-                navigation.navigate('Home');            
+                navigation.navigate('Aspect');            
             } else {
                 navigation.navigate('Profile');
             }

@@ -132,9 +132,7 @@ const ProfileScreen = () => {
           <Text style={styles.buttonText}>Update Profile</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handlePlayGame}>
-          <Text style={styles.buttonText}>Play game</Text>
-        </TouchableOpacity>
+        
       </View>
     </ImageBackground>
   );
