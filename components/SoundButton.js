@@ -1,9 +1,8 @@
-// SoundButton.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from 'react-native';
 import { Audio } from 'expo-av';
 
-const SoundButton = ({ title, onPress, ...props }) => {
+const SoundButton = ({ title, onPress, isSoundEffectsMuted, ...props }) => {
   const [sound, setSound] = useState(null);
 
   useEffect(() => {
@@ -18,7 +17,6 @@ const SoundButton = ({ title, onPress, ...props }) => {
         console.log('Error loading sound effect:', error);
       }
     };
-
     loadSound();
 
     return () => {
@@ -29,7 +27,7 @@ const SoundButton = ({ title, onPress, ...props }) => {
   }, []);
 
   const handleButtonPress = async () => {
-    if (sound) {
+    if (!isSoundEffectsMuted && sound) {
       try {
         await sound.replayAsync();
         if (onPress) {
@@ -38,17 +36,14 @@ const SoundButton = ({ title, onPress, ...props }) => {
       } catch (error) {
         console.log('Error playing sound effect:', error);
       }
+    } else {
+      if (onPress) {
+        onPress();
+      }
     }
   };
 
-  const toggleMute = async () => {
-    if (sound) {
-      const status = await sound.getStatusAsync();
-      await sound.setIsMutedAsync(!status.isMuted);
-    }
-  };
-
-  return { Button: <Button title={title} onPress={handleButtonPress} {...props} />, toggleMute };  // Return the Button component and the toggleMute function
+  return <Button title={title} onPress={handleButtonPress} {...props} />;
 };
 
 export default SoundButton;

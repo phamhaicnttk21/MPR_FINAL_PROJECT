@@ -1,29 +1,32 @@
-// SettingsScreen.js
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import SoundButton from '../components/SoundButton';
-import BackgroundMusic from '../components/BackgroundMusic';
-import RewardedSound from '../components/RewardedSound';
 
-const SettingsScreen = ({ navigation }) => {
-  const backgroundMusic = BackgroundMusic();
-  const rewardedSound = RewardedSound();
-  const soundButton = SoundButton({ title: "Go to Instruction Screen", onPress: () => navigation.navigate('Instruction') });
+const SettingsScreen = ({ route, navigation }) => {
+  const {
+    backgroundSound,
+    toggleMuteBackgroundSound,
+    toggleMuteSoundEffects,
+    isSoundEffectsMuted,
+  } = route.params;
 
   return (
     <View style={styles.container}>
       <SoundButton
         title="Mute/Unmute Background Music"
-        onPress={backgroundMusic.toggleMute}
+        onPress={toggleMuteBackgroundSound}
+        isSoundEffectsMuted={isSoundEffectsMuted}
       />
       <SoundButton
-        title="Mute/Unmute Sound Effects"
-        onPress={() => {
-          rewardedSound.toggleMute();
-          soundButton.toggleMute();
-        }}
+        title={isSoundEffectsMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
+        onPress={toggleMuteSoundEffects}
+        isSoundEffectsMuted={isSoundEffectsMuted}
       />
-      {soundButton.Button}
+      <SoundButton
+        title="Go to Instruction Screen"
+        onPress={() => navigation.navigate('Instructions')}
+        isSoundEffectsMuted={isSoundEffectsMuted}
+      />
     </View>
   );
 };

@@ -5,7 +5,6 @@ const InstructionsScreen = () => {
   return (
     <View style={styles.container}>
       <Text>Instructions Screen</Text>
-      {/* Add your instructions content here */}
     </View>
   );
 };
