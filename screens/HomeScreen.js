@@ -47,6 +47,12 @@ function HomeScreen({navigation}) {
                 iconWidth={30}
                 listenKeyboard={true}
             />  
+
+            {/*Go to Profile screen */}
+            <Button
+                title="Go to profile screen"
+                onPress={() => navigation.navigate('Profile')}
+            />
         </View>
     );
 }

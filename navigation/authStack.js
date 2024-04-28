@@ -7,6 +7,7 @@ import LogInScreen from "../screens/LogInScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
+import Aspect from "../screens/Aspect";
 
 const Stack = createStackNavigator();
 
@@ -20,12 +21,17 @@ function AuthStack() {
                 <Stack.Screen name = "Home" component={HomeScreen}/>
                 <Stack.Screen name='Profile'
                     component={ProfileScreen}
-                    options={{title:'Create Profile'}}
+                    options={{title:'Profile'}}
                 />
                 <Stack.Screen 
                     name='EditProfile'
                     component={EditProfileScreen}
                     options={{title:'Edit Profile'}}
+                />
+               <Stack.Screen 
+                    name='Aspect'
+                    component={Aspect}
+                    options={{title:'Aspect'}}
                 />
             </Stack.Navigator>
         </NavigationContainer>

@@ -3,6 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
+import Aspect from "../screens/Aspect";
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,11 @@ function UserStack() {
                 component={EditProfileScreen}
                 options={{title:'Edit Profile'}}
             />
+            <Stack.Screen 
+                    name='Aspect'
+                    component={Aspect}
+                    options={{title:'Aspect'}}
+                />
         </Stack.Navigator>
     </NavigationContainer>
 }

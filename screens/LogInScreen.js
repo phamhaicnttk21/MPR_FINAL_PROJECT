@@ -1,10 +1,9 @@
 import { StatusBar } from "expo-status-bar";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useState } from "react";
 import { Button, Input } from "react-native-elements";
 import { Ionicons } from '@expo/vector-icons';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getFirestore, collection, getDoc } from 'firebase/firestore';
 
 const auth = getAuth();
 
@@ -26,20 +25,7 @@ function LogInScreen({navigation}) {
 
         try {
             await signInWithEmailAndPassword(auth, value.email, value.password);
-
-            const db = getFirestore();
-            const docRef = doc(db, 'users', auth.currentUser.email);
-            getDoc(docRef).then((doc) => {
-            if (doc.exists()) {
-                navigation.navigate('Home');            
-            } else {
-                navigation.navigate('Profile');
-            }
-            }).catch((error) => {
-                console.error(error);
-                Alert.alert('Error', error);
-            });
-
+            navigation.navigate('Home');
         } catch (error) {
             setValue({
             ...value,
