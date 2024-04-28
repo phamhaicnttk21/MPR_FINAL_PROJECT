@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground} from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground, TextInput} from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { doc, setDoc, getFirestore, collection, getDoc } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
+
 import { useNavigation } from '@react-navigation/native'; 
 
 const auth = getAuth();
@@ -10,14 +11,18 @@ const auth = getAuth();
 const ProfileScreen = () => {
   const navigation = useNavigation();
 
+
   const [userId, setUserId] = useState(null);
 
   const [name, setName] = useState('Test');
-  const [email, setEmail] = useState('email@gmail.com');
-  const [age, setAge] = useState('30');
+  const [gender, setGender] = useState(null);
   const [avatar, setAvatar] = useState(require('../assets/img/tomcruise.jpg')); // Make sure you have this image in your assets
   
-  
+  const genderPickerData = [
+    {title: 'Male'},
+    {title: 'Female'},
+    {title: 'Non-binary'},
+  ]
 
   async function writeUserDatabase() {
     const db = getFirestore();
@@ -26,13 +31,12 @@ const ProfileScreen = () => {
       await setDoc(doc(db, 'users', auth.currentUser.email), {
         name: name,
         email: auth.currentUser.email,
+        gender: gender,
       });
     } catch (error) {
       console.error("Error writing document: ", error);
     }
   }
-
-  
 
   const selectAvatar = () => {
     const options = {
@@ -53,23 +57,22 @@ const ProfileScreen = () => {
   };
 
   const updateProfile = (userId) => {
-    
-
     writeUserDatabase();
 
     const db = getFirestore();
-
-    
     const docRef = doc(db, 'users', auth.currentUser.email);
-
     getDoc(docRef).then((doc) => {
       if (doc.exists()) {
-        Alert.alert('Profile Updated', `Your profile information has been updated successfully.`);
+        Alert.alert('Profile Updated', 
+        `Your profile information has been updated successfully.`,
+        [{text:'Start Game', onPress: () => {navigation.navigate('Home')}}],
+      );
       } else {
-        console.log("No data available");
+        console.log(`Can't create profile`);
       }
     }).catch((error) => {
       console.error(error);
+      Alert.alert('Error', error);
     });
     
     
@@ -91,13 +94,37 @@ const ProfileScreen = () => {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Name</Text>
-          <Text style={styles.input}>{name}</Text>
+          <TextInput 
+            style={styles.input}
+            onChangeText={text => setName(text)}>        
+          </TextInput>
 
-          <Text style={styles.label}>Email</Text>
-          <Text style={styles.input}>{email}</Text>
-
-          <Text style={styles.label}>Age</Text>
-          <Text style={styles.input}>{age}</Text>
+          <Text style={styles.label}>Gender</Text>
+          <SelectDropdown
+            data = {genderPickerData}
+            onSelect={(selectedItem, index) => {
+              setGender(selectedItem.title);
+            }}
+            renderButton={(selectedItem, isOpened) => {
+              return (
+                <View style={styles.dropdownButtonStyle}>
+                  <Text style={styles.dropdownButtonTxtStyle}>
+                    {(selectedItem && selectedItem.title) || 'Select'}
+                  </Text>
+                  <Icon name={isOpened ? 'chevron-up' : 'chevron-down'} style={styles.dropdownButtonArrowStyle} />
+                </View>
+              );
+            }}
+            renderItem={(item, index, isSelected) => {
+              return(
+                <View style={{...styles.dropdownItemStyle, ...(isSelected && {backgroundColor: '#D2D9DF'})}}>                 
+                  <Text style={styles.dropdownItemTxtStyle}>{item.title}</Text>
+                </View>
+              )
+            }}
+            showsVerticalScrollIndicator={true}
+            dropdownStyle = {styles.dropdownMenuStyle}
+          />
 
         </View>
 
@@ -157,6 +184,7 @@ const styles = StyleSheet.create({
     padding: 15,
     fontSize: 16,
     marginBottom: 15,
+    paddingVertical: 10,
   },
   button: {
     backgroundColor: '#0000ff',
@@ -169,6 +197,41 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     textAlign: 'center',
+  },
+  dropdownMenuStyle: {
+    borderRadius: 10,
+  },
+  dropdownItemStyle: {
+    width: '100%',
+    flexDirection: 'row',
+    paddingHorizontal: 12,
+    justifyContent: 'left',
+    alignItems: 'left',
+    paddingVertical: 8,
+  },
+  dropdownItemTxtStyle: {
+    flex: 1,
+    fontSize: 18,
+    color: '#151E26',
+  },
+  dropdownButtonStyle: {    
+    height: 50,
+    backgroundColor: 'white',
+    borderRadius: 60,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  dropdownButtonTxtStyle: {
+    flex: 1,
+    fontSize: 16,    
+    color: '#151E26',
+  },
+  dropdownButtonArrowStyle: {
+    fontSize: 28,
   },
 });
 
