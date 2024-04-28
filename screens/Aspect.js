@@ -1,19 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
-import { dummyData } from './dummyData'; 
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'; // Assuming you're using Expo for vector icons
-import Toast from 'react-native-toast-message'; // Import toast message library
+import { dummyData } from '../dummyData';
+
 const { height } = Dimensions.get('window');
 
 const Aspect = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [loading, setLoading] = useState(true);
   const menuAnimation = useRef(new Animated.Value(-height / 2)).current;
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
 
   const toggleMenu = (menuType) => {
     if (showMenu === menuType) {
@@ -63,7 +59,7 @@ const Aspect = () => {
     return (
       <View style={styles.menuContent}>
         {options.map((option) => (
-          <TouchableOpacity key={option.id} onPress={() => showToast(option.option)}>
+          <TouchableOpacity key={option.id} >
             <View style={styles.menuOptionContainer}>
               <Text style={styles.menuOptionText}>
                 {option.option}
@@ -80,18 +76,10 @@ const Aspect = () => {
     );
   };
 
-  const showToast = (message) => {
-    Toast.show({
-      type: 'success',
-      text1: message,
-      visibilityTime: 2000,
-      autoHide: true,
-    });
-  };
-
   const removeOption = (id) => {
     setSelectedOptions(selectedOptions.filter(optionId => optionId !== id));
   };
+
   const showAllOptions = () => {
     setShowMenu('all');
     Animated.timing(menuAnimation, {
@@ -100,9 +88,30 @@ const Aspect = () => {
       useNativeDriver: true,
     }).start();
   };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex(currentIndex => (currentIndex + 1) % dummyData.ageoptions.length);
+    }, 12 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <View style={styles.wrap}>
+      <View>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Age: {dummyData.ageoptions[currentIndex].age}</Text>
+        <FlatList
+          data={dummyData.ageoptions[currentIndex].activities}
+          renderItem={({ item: activity }) => (
+            <TouchableOpacity onPress={() => handleOptionPress(activity.option)}>
+              <View style={{ marginLeft: 20 }}>
+                <Text>{activity.option}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(activity, index) => index.toString()}
+        />
+      </View>
       <View style={styles.aspectOverview}>
         <View style={styles.itemContainer}>
           <TouchableOpacity style={styles.career} onPress={() => toggleMenu('career')}>
@@ -225,6 +234,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 8,
+  },
+  menuOptionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   menuOptionText: {
     fontSize: 16,

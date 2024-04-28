@@ -3,13 +3,14 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground
 import { launchImageLibrary } from 'react-native-image-picker';
 import { doc, setDoc, getFirestore, collection, getDoc } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
-import SelectDropdown from 'react-native-select-dropdown';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import { useNavigation } from '@react-navigation/native'; 
 
 const auth = getAuth();
 
-const ProfileScreen = ({navigation}) => {
+const ProfileScreen = () => {
+  const navigation = useNavigation();
+
 
   const [userId, setUserId] = useState(null);
 
@@ -76,6 +77,10 @@ const ProfileScreen = ({navigation}) => {
     
     
   };
+  const handlePlayGame = () => {
+    // Navigate to Aspect screen
+    navigation.navigate('Aspect');
+  };
 
   return (
     <ImageBackground
@@ -125,6 +130,10 @@ const ProfileScreen = ({navigation}) => {
 
         <TouchableOpacity style={styles.button} onPress={updateProfile}>
           <Text style={styles.buttonText}>Update Profile</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={handlePlayGame}>
+          <Text style={styles.buttonText}>Play game</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
