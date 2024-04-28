@@ -9,7 +9,12 @@ const Aspect = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const menuAnimation = useRef(new Animated.Value(-height / 2)).current;
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   const toggleMenu = (menuType) => {
     if (showMenu === menuType) {
@@ -157,6 +162,38 @@ const Aspect = () => {
           </View>
         ) : renderMenuContent()}
       </Animated.View>
+      <View style={styles.indexWrap}>
+        <View style={styles.attributeContainer}>
+          <Text style={styles.label}>Health</Text>
+          <View style={styles.barContainer}>
+            <View style={[styles.bar, styles.barHealth, { width: '80%' }]} />
+          </View>
+        </View>
+        <View style={styles.attributeContainer}>
+          <Text style={styles.label}>Happiness</Text>
+          <View style={styles.barContainer}>
+            <View style={[styles.bar, styles.barHappiness, { width: '60%' }]} />
+          </View>
+        </View>
+        <View style={styles.attributeContainer}>
+          <Text style={styles.label}>Strength</Text>
+          <View style={styles.barContainer}>
+            <View style={[styles.bar, styles.barStrength, { width: '70%' }]} />
+          </View>
+        </View>
+        <View style={styles.attributeContainer}>
+          <Text style={styles.label}>Intelligence</Text>
+          <View style={styles.barContainer}>
+            <View style={[styles.bar, styles.barIntelligence, { width: '90%' }]} />
+          </View>
+        </View>
+        <View style={styles.attributeContainer}>
+          <Text style={styles.label}>Charisma</Text>
+          <View style={styles.barContainer}>
+            <View style={[styles.bar, styles.barCharisma, { width: '50%' }]} />
+          </View>
+        </View>
+      </View>
     </View>
   );
 };
@@ -235,16 +272,69 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
   },
-  menuOptionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
   menuOptionText: {
     fontSize: 16,
     marginBottom: 8,
   },
+  indexWrap: {
+    marginTop: 100,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  attributeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  label: {
+    width: 100,
+    marginRight: 10,
+    textAlign: 'right',
+  },
+  barContainer: {
+    flex: 1,
+    height: 10,
+    backgroundColor: 'lightgray', // Background color for the container
+    borderRadius: 5, // Rounded corners for the container
+    overflow: 'hidden', // Ensure the colored bar doesn't overflow the container
+  },
+  bar: {
+    height: '100%',
+    borderRadius: 5, // Match the border radius of the container
+  },
+  // Define colors for each attribute
+  barHealth: {
+    backgroundColor: 'green',
+  },
+  barHappiness: {
+    backgroundColor: 'blue',
+  },
+  barStrength: {
+    backgroundColor: 'orange',
+  },
+  barIntelligence: {
+    backgroundColor: 'purple',
+  },
+  barCharisma: {
+    backgroundColor: 'red',
+  },
+  // Define colors for each attribute
+  barHealth: {
+    backgroundColor: 'green',
+  },
+  barHappiness: {
+    backgroundColor: 'blue',
+  },
+  barStrength: {
+    backgroundColor: 'orange',
+  },
+  barIntelligence: {
+    backgroundColor: 'purple',
+  },
+  barCharisma: {
+    backgroundColor: 'red',
+  },
+
 });
 
 export default Aspect;
