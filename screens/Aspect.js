@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, FlatList } from 'react-native';
+import React, { useState, useRef, useEffect, Children } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, FlatList, Alert, Modal, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { doc, getFirestore, setDoc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -10,9 +10,11 @@ const { height } = Dimensions.get('window');
 const Aspect = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(null);
+  const [menuType, setMenuType] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const menuAnimation = useRef(new Animated.Value(-height / 2)).current;
+  const [modalVisible, setModalVisible] = useState(false);
 
 
 
@@ -74,36 +76,14 @@ const Aspect = () => {
     readData();
   }, []);
 
-  const toggleMenu = (menuType) => {
-    if (showMenu === menuType) {
-      hideMenu();
-    } else {
-      showMenuAnimation(menuType);
-    }
-  };
-
-  const showMenuAnimation = (menuType) => {
-    setShowMenu(menuType);
-    Animated.timing(menuAnimation, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const hideMenu = () => {
-    Animated.timing(menuAnimation, {
-      toValue: -height / 2,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setShowMenu(null);
-    });
+  const toggleMenu = (clickedMenuType) => {
+    setModalVisible(true);
+    setMenuType(clickedMenuType);
   };
 
   const renderMenuContent = () => {
     let options = [];
-    switch (showMenu) {
+    switch (menuType) {
       case 'career':
         options = dummyData.career;
         break;
@@ -237,7 +217,7 @@ const Aspect = () => {
       </View>
       <View style={styles.aspectOverview}>
         <View style={styles.itemContainer}>
-          <TouchableOpacity style={styles.career} onPress={() => toggleMenu('career')}>
+          <TouchableOpacity style={styles.career}  onPress={() => toggleMenu('career')}>
             <Text style={styles.careerText}>Career</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.social} onPress={() => toggleMenu('social')}>
@@ -251,10 +231,22 @@ const Aspect = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <Animated.View style={[styles.menuContainer, { transform: [{ translateY: menuAnimation }] }]}>
-        {showMenu === 'all' ? (
+
+    <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.modalCenteredView}>
+          <View style={styles.modalView}>
+          
+            <Text style={styles.modalText}>Choose {menuType}</Text>
+            {showMenu === 'all' ? (
           <View style={styles.menuContent}>
-            {options.map((option) => (
+            {dummyData.career.map((option) => (
               <OptionButton
                 key={option.id}
                 option={option}
@@ -274,11 +266,20 @@ const Aspect = () => {
             {dummyData.activities.map((option) => (
               <Text key={option.id} style={styles.menuOptionText}>
                 {option.option}
-              </Text>
+              </Text>              
             ))}
+            
           </View>
         ) : renderMenuContent()}
-      </Animated.View>
+            <Pressable
+              style={[styles.modalButton, styles.modalButtonClose]}
+              onPress={() => setModalVisible(!modalVisible)}>
+              <Text style={styles.textStyle}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
       <View style={styles.indexWrap}>
         <View style={styles.attributeContainer}>
           <Text style={styles.label}>Health</Text>
@@ -457,7 +458,39 @@ const styles = StyleSheet.create({
   barCharisma: {
     backgroundColor: 'red',
   },
-
+  modalCenteredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalButton: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  modalButtonClose: {
+    backgroundColor: '#2196F3',
+  },
 });
 
 export default Aspect;
