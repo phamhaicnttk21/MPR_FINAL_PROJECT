@@ -11,7 +11,7 @@ function SignUpScreen({navigation}) {
     const [value, setValue] = useState({
         email: '',
         password: '',
-        error: ''
+        error: '',
     })
 
     async function signUp() {

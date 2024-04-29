@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground, TextInput} from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { doc, setDoc, getFirestore, collection, getDoc } from 'firebase/firestore';
+import SelectDropdown from 'react-native-select-dropdown';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Example using FontAwesome icons
 import { getAuth } from "firebase/auth";
 
 import { useNavigation } from '@react-navigation/native'; 
@@ -17,7 +19,7 @@ const ProfileScreen = () => {
   const [name, setName] = useState('Test');
   const [gender, setGender] = useState(null);
   const [avatar, setAvatar] = useState(require('../assets/img/tomcruise.jpg')); // Make sure you have this image in your assets
-  
+
   const genderPickerData = [
     {title: 'Male'},
     {title: 'Female'},
@@ -32,6 +34,10 @@ const ProfileScreen = () => {
         name: name,
         email: auth.currentUser.email,
         gender: gender,
+        happiness: 100,
+        intelligence: 100,
+        christma: 100,
+        strength: 100,
       });
     } catch (error) {
       console.error("Error writing document: ", error);
@@ -57,6 +63,7 @@ const ProfileScreen = () => {
   };
 
   const updateProfile = (userId) => {
+    console.log('clicked');
     writeUserDatabase();
 
     const db = getFirestore();
