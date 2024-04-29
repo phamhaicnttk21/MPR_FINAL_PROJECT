@@ -1,11 +1,16 @@
 {
   "expo": {
-    "name": "lifesimulator",
-    "slug": "lifesimulator",
+    "name": "I_am_developer",
+    "slug": "I_am_developer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/icons/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
