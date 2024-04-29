@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { View, Text, StyleSheet, Button } from "react-native";
+import { View, Text, StyleSheet, Button ,TouchableOpacity} from "react-native";
 import { FloatingAction } from "react-native-floating-action";
 import Toast from "react-native-root-toast";
 import { DateTime } from "luxon";
@@ -12,7 +12,11 @@ function HomeScreen({ navigation }) {
         icon: require("../assets/icons/dailyRewardButtonIcon.png"),
         name: "log_in_reward_button",
         position: 1,
-    }]
+    }];
+    const handlePlayGame = () => {
+        // Navigate to Aspect screen
+        navigation.navigate('Aspect');
+      };
 
     return (
         <View style={styles.container}>

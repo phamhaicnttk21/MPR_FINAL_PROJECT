@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, FlatList } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons'; // Assuming you're using Expo for vector icons
-import { dummyData } from '../dummyData';
+import { FontAwesome } from '@expo/vector-icons';
 import { doc, getFirestore, setDoc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { dummyData } from '../dummyData';
 
 const { height } = Dimensions.get('window');
 
@@ -69,6 +69,9 @@ const Aspect = () => {
 
   useEffect(() => {
     setLoading(false);
+  }, []);
+  useEffect(() => {
+    readData();
   }, []);
 
   const toggleMenu = (menuType) => {
@@ -147,24 +150,44 @@ const Aspect = () => {
 
     return () => clearInterval(interval);
   }, []);
+  const [userData, setUserData] = useState(null);
+
+  const readData = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', user.email);
+  
+    try {
+      const docSnapshot = await getDoc(userDocRef);
+      if (docSnapshot.exists()) {
+        setUserData(docSnapshot.data());
+      } else {
+        console.log("User document does not exist");
+      }
+    } catch (error) {
+      console.error("Error reading document: ", error);
+    }
+  };
+  const pointData = readData();
   const handleOptionPress = async (happiness, health, intelligence, strength, christma) => {
     const auth = getAuth();
     const user = auth.currentUser;
     const db = getFirestore();
     const userDocRef = doc(db, 'users', user.email);
-
+  
     // Get the current document data
     getDoc(userDocRef)
       .then((docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-
+  
           const inthappiness = parseInt(happiness || 0);
           const inthealth = parseInt(health || 0);
           const intintelligence = parseInt(intelligence || 0);
           const intchristma = parseInt(christma || 0);
           const intstrength = parseInt(strength || 0);
-
+  
           console.log(data.happiness);
           const newData = {
             name: data.name,
@@ -183,6 +206,8 @@ const Aspect = () => {
       })
       .then(() => {
         console.log("Document successfully updated!");
+        // Call the readData function to fetch the updated data
+        readData();
       })
       .catch((error) => {
         console.error("Error updating document: ", error);
@@ -192,6 +217,7 @@ const Aspect = () => {
     await updateUserPoints(option);
     onPress();
   };
+  
 
   return (
     <View style={styles.wrap}>
@@ -256,32 +282,37 @@ const Aspect = () => {
       <View style={styles.indexWrap}>
         <View style={styles.attributeContainer}>
           <Text style={styles.label}>Health</Text>
+          <Text>{userData ? userData.health : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-            <View style={[styles.bar, styles.barHealth, { width: '80%' }]} />
+          <Text>{pointData.health}</Text>
           </View>
         </View>
         <View style={styles.attributeContainer}>
           <Text style={styles.label}>Happiness</Text>
+          <Text>{userData ? userData.happiness : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-            <View style={[styles.bar, styles.barHappiness, { width: '60%' }]} />
+          <Text>{pointData.happiness}</Text>
           </View>
         </View>
         <View style={styles.attributeContainer}>
           <Text style={styles.label}>Strength</Text>
+          <Text>{userData ? userData.strength : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-            <View style={[styles.bar, styles.barStrength, { width: '70%' }]} />
+            <Text>{pointData.strength}</Text>
           </View>
         </View>
         <View style={styles.attributeContainer}>
           <Text style={styles.label}>Intelligence</Text>
+          <Text>{userData ? userData.intelligence : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-            <View style={[styles.bar, styles.barIntelligence, { width: '90%' }]} />
+          <Text>{pointData.intelligence}</Text>
           </View>
         </View>
         <View style={styles.attributeContainer}>
           <Text style={styles.label}>Charisma</Text>
+          <Text>{userData ? userData.charisma : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-            <View style={[styles.bar, styles.barCharisma, { width: '50%' }]} />
+          <Text>{pointData.christma}</Text>
           </View>
         </View>
       </View>
@@ -368,7 +399,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   indexWrap: {
-    marginTop: 10,
+    marginTop: 5,
     flexDirection: 'column',
     alignItems: 'flex-start',
 
