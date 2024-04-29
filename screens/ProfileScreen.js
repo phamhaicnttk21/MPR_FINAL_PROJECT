@@ -34,10 +34,11 @@ const ProfileScreen = () => {
         name: name,
         email: auth.currentUser.email,
         gender: gender,
-        happiness: 100,
-        intelligence: 100,
-        christma: 100,
-        strength: 100,
+        happiness: 1000,
+        intelligence: 1000,
+        christma: 1000,
+        strength: 1000,
+        health: 1000
       });
     } catch (error) {
       console.error("Error writing document: ", error);

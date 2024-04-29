@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'; // Assuming you're using Expo for vector icons
 import { dummyData } from '../dummyData';
-import { doc, getFirestore, setDoc } from 'firebase/firestore';
+import { doc, getFirestore, setDoc, getDoc } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const { height } = Dimensions.get('window');
 
@@ -14,19 +15,20 @@ const Aspect = () => {
   const menuAnimation = useRef(new Animated.Value(-height / 2)).current;
 
 
- 
+
 
   async function writeUserDatabase() {
     const db = getFirestore();
     try {
-    await setDoc (doc (db, 'users', auth.currentUser.email), {
-    
-    name: name,
-    email: auth.currentUser.email,
-    gender: gender,
-    
-  })} catch (error) {
-    console.error("Error writing document: ", error);
+      await setDoc(doc(db, 'users', auth.currentUser.email), {
+
+        name: name,
+        email: auth.currentUser.email,
+        gender: gender,
+
+      })
+    } catch (error) {
+      console.error("Error writing document: ", error);
     }
   }
 
@@ -34,11 +36,11 @@ const Aspect = () => {
     try {
       const user = firebase.auth().currentUser;
       const uid = user ? user.uid : null;
-  
+
       if (uid) {
-        const userRef = firebase.firestore().doc(users/$,{uid});
+        const userRef = firebase.firestore().doc(users / $, { uid });
         const userDoc = await userRef.get();
-  
+
         if (userDoc.exists) {
           // Update the existing user document with the new points
           await userRef.update({
@@ -62,9 +64,9 @@ const Aspect = () => {
     }
   }
 
-  
 
-  
+
+
   useEffect(() => {
     setLoading(false);
   }, []);
@@ -145,41 +147,46 @@ const Aspect = () => {
 
     return () => clearInterval(interval);
   }, []);
-  const handleOptionPress = async (option) => {
-    try {
-      const user = firebase.auth().currentUser;
-      const uid = user ? user.uid : null;
-  
-      if (uid) {
-        const userRef = firebase.firestore().doc(users/$,{uid});
-        const userDoc = await userRef.get();
-  
-        let updatedData = {};
-  
-        if (userDoc.exists) {
-          // Update the existing user document with the new points
-          const { happiness, intelligence, charisma } = userDoc.data();
-          updatedData = {
-            happiness: happiness + option.happiness,
-            intelligence: intelligence + option.intelligencePoints,
-            charisma: charisma + option.charismaPoints,
-            selectedOptions: [...userDoc.data().selectedOptions, option.id], // Add the selected option ID to the array
+  const handleOptionPress = async (happiness, health, intelligence, strength, christma) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', user.email);
+
+    // Get the current document data
+    getDoc(userDocRef)
+      .then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+
+          const inthappiness = parseInt(happiness || 0);
+          const inthealth = parseInt(health || 0);
+          const intintelligence = parseInt(intelligence || 0);
+          const intchristma = parseInt(christma || 0);
+          const intstrength = parseInt(strength || 0);
+
+          console.log(data.happiness);
+          const newData = {
+            name: data.name,
+            email: data.email,
+            gender: data.gender,
+            happiness: (data.happiness || 0) + inthappiness,
+            intelligence: (data.intelligence || 0) + intintelligence,
+            christma: (data.christma || 0) + intchristma,
+            strength: (data.strength || 0) + intstrength,
+            health: (data.health || 0) + inthealth
           };
+          return setDoc(userDocRef, newData);
         } else {
-          // Create a new user document with the initial points
-          updatedData = {
-            happiness: option.happiness,
-            intelligence: option.intelligencePoints,
-            charisma: option.charismaPoints,
-            selectedOptions: [option.id], // Initialize the array with the selected option ID
-          };
+          throw new Error("Document does not exist");
         }
-  
-        await userRef.set(updatedData, { merge: true });
-      }
-    } catch (error) {
-      console.error('Error updating user points:', error);
-    }
+      })
+      .then(() => {
+        console.log("Document successfully updated!");
+      })
+      .catch((error) => {
+        console.error("Error updating document: ", error);
+      });
   };
   const handlePress = async () => {
     await updateUserPoints(option);
@@ -193,7 +200,7 @@ const Aspect = () => {
         <FlatList
           data={dummyData.ageoptions[currentIndex].activities}
           renderItem={({ item: activity }) => (
-            <TouchableOpacity onPress={() => handleOptionPress(activity.option)}>
+            <TouchableOpacity onPress={() => handleOptionPress(activity.happiness, activity.health, activity.intelligence, activity.strength, activity.christma)}>
               <View style={{ marginLeft: 20 }}>
                 <Text>{activity.option}</Text>
               </View>
@@ -221,13 +228,13 @@ const Aspect = () => {
       <Animated.View style={[styles.menuContainer, { transform: [{ translateY: menuAnimation }] }]}>
         {showMenu === 'all' ? (
           <View style={styles.menuContent}>
-          {options.map((option) => (
-        <OptionButton
-          key={option.id}
-          option={option}
-          onPress={() => handleOptionPress(option)}
-        />
-      ))}
+            {options.map((option) => (
+              <OptionButton
+                key={option.id}
+                option={option}
+                onPress={() => handleOptionPress(option)}
+              />
+            ))}
             {dummyData.social.map((option) => (
               <Text key={option.id} style={styles.menuOptionText}>
                 {option.option}
