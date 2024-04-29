@@ -8,7 +8,7 @@ import { dummyData } from '../dummyData';
 const { height } = Dimensions.get('window');
 
 const Aspect = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentAge, setCurrentAge] = useState(null);
   const [showMenu, setShowMenu] = useState(null);
   const [menuType, setMenuType] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -16,6 +16,29 @@ const Aspect = () => {
   const menuAnimation = useRef(new Animated.Value(-height / 2)).current;
   const [modalVisible, setModalVisible] = useState(false);
 
+
+  useEffect(() => {
+    const fetchUserAge = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      const db = getFirestore();
+      const userDocRef = doc(db, 'users', user.email);
+
+      try {
+        const docSnapshot = await getDoc(userDocRef);
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          setCurrentAge(data.currentAge);
+        } else {
+          console.log("User document does not exist");
+        }
+      } catch (error) {
+        console.error("Error reading document: ", error);
+      }
+    };
+
+    fetchUserAge();
+  }, []);
 
 
 
@@ -123,21 +146,63 @@ const Aspect = () => {
     setSelectedOptions(selectedOptions.filter(optionId => optionId !== id));
   };
 
+  const [userData, setUserData] = useState(null);
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex(currentIndex => (currentIndex + 1) % dummyData.ageoptions.length);
-    }, 12 * 60 * 1000);
+      setCurrentAge(currentAge => (currentAge + 1) % dummyData.ageoptions.length);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
-  const [userData, setUserData] = useState(null);
+
+  const updateUserAge = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', user.email);
+
+    try {
+      const docSnapshot = await getDoc(userDocRef);
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        const newAge = data.currentAge + 1;
+        const newData = {
+          name: data.name,
+          email: data.email,
+          gender: data.gender,
+          currentAge: newAge,
+          happiness: data.happiness,
+          intelligence: data.intelligence,
+          christma: data.christma,
+          strength: data.strength,
+          health: data.health
+        };
+        return setDoc(userDocRef, newData);
+
+      } else {
+        console.log("User document does not exist");
+      }
+    } catch (error) {
+      console.error("Error reading document: ", error);
+    }
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(updateUserAge, 5000);
+
+    return () => clearInterval(intervalId); // Cleanup function to clear the interval when the component unmounts
+  }, []);
+
+
+
+  const currentAgeData = dummyData.ageoptions.find(option => option.age === currentAge);
 
   const readData = async () => {
     const auth = getAuth();
     const user = auth.currentUser;
     const db = getFirestore();
     const userDocRef = doc(db, 'users', user.email);
-  
+
     try {
       const docSnapshot = await getDoc(userDocRef);
       if (docSnapshot.exists()) {
@@ -155,19 +220,19 @@ const Aspect = () => {
     const user = auth.currentUser;
     const db = getFirestore();
     const userDocRef = doc(db, 'users', user.email);
-  
+
     // Get the current document data
     getDoc(userDocRef)
       .then((docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-  
+
           const inthappiness = parseInt(happiness || 0);
           const inthealth = parseInt(health || 0);
           const intintelligence = parseInt(intelligence || 0);
           const intchristma = parseInt(christma || 0);
           const intstrength = parseInt(strength || 0);
-  
+
           console.log(data.happiness);
           const newData = {
             name: data.name,
@@ -197,16 +262,25 @@ const Aspect = () => {
     await updateUserPoints(option);
     onPress();
   };
-  
+
 
   return (
     <View style={styles.wrap}>
       <View>
-        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Age: {dummyData.ageoptions[currentIndex].age}</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Age: {currentAge}</Text>
         <FlatList
-          data={dummyData.ageoptions[currentIndex].activities}
+          data={currentAgeData ? currentAgeData.activities : []}
           renderItem={({ item: activity }) => (
-            <TouchableOpacity onPress={() => handleOptionPress(activity.happiness, activity.health, activity.intelligence, activity.strength, activity.christma)}>
+            <TouchableOpacity
+              onPress={() =>
+                handleOptionPress(
+                  activity.happiness,
+                  activity.health || 0,
+                  activity.intelligence || 0,
+                  activity.strength || 0
+                )
+              }
+            >
               <View style={{ marginLeft: 20 }}>
                 <Text>{activity.option}</Text>
               </View>
@@ -217,7 +291,7 @@ const Aspect = () => {
       </View>
       <View style={styles.aspectOverview}>
         <View style={styles.itemContainer}>
-          <TouchableOpacity style={styles.career}  onPress={() => toggleMenu('career')}>
+          <TouchableOpacity style={styles.career} onPress={() => toggleMenu('career')}>
             <Text style={styles.careerText}>Career</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.social} onPress={() => toggleMenu('social')}>
@@ -232,7 +306,7 @@ const Aspect = () => {
         </View>
       </View>
 
-    <Modal
+      <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
@@ -242,35 +316,35 @@ const Aspect = () => {
         }}>
         <View style={styles.modalCenteredView}>
           <View style={styles.modalView}>
-          
+
             <Text style={styles.modalText}>Choose {menuType}</Text>
             {showMenu === 'all' ? (
-          <View style={styles.menuContent}>
-            {dummyData.career.map((option) => (
-              <OptionButton
-                key={option.id}
-                option={option}
-                onPress={() => handleOptionPress(option)}
-              />
-            ))}
-            {dummyData.social.map((option) => (
-              <Text key={option.id} style={styles.menuOptionText}>
-                {option.option}
-              </Text>
-            ))}
-            {dummyData.finance.map((option) => (
-              <Text key={option.id} style={styles.menuOptionText}>
-                {option.option}
-              </Text>
-            ))}
-            {dummyData.activities.map((option) => (
-              <Text key={option.id} style={styles.menuOptionText}>
-                {option.option}
-              </Text>              
-            ))}
-            
-          </View>
-        ) : renderMenuContent()}
+              <View style={styles.menuContent}>
+                {dummyData.career.map((option) => (
+                  <OptionButton
+                    key={option.id}
+                    option={option}
+                    onPress={() => handleOptionPress(option)}
+                  />
+                ))}
+                {dummyData.social.map((option) => (
+                  <Text key={option.id} style={styles.menuOptionText}>
+                    {option.option}
+                  </Text>
+                ))}
+                {dummyData.finance.map((option) => (
+                  <Text key={option.id} style={styles.menuOptionText}>
+                    {option.option}
+                  </Text>
+                ))}
+                {dummyData.activities.map((option) => (
+                  <Text key={option.id} style={styles.menuOptionText}>
+                    {option.option}
+                  </Text>
+                ))}
+
+              </View>
+            ) : renderMenuContent()}
             <Pressable
               style={[styles.modalButton, styles.modalButtonClose]}
               onPress={() => setModalVisible(!modalVisible)}>
@@ -285,14 +359,14 @@ const Aspect = () => {
           <Text style={styles.label}>Health</Text>
           <Text>{userData ? userData.health : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-          <Text>{pointData.health}</Text>
+            <Text>{pointData.health}</Text>
           </View>
         </View>
         <View style={styles.attributeContainer}>
           <Text style={styles.label}>Happiness</Text>
           <Text>{userData ? userData.happiness : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-          <Text>{pointData.happiness}</Text>
+            <Text>{pointData.happiness}</Text>
           </View>
         </View>
         <View style={styles.attributeContainer}>
@@ -306,14 +380,14 @@ const Aspect = () => {
           <Text style={styles.label}>Intelligence</Text>
           <Text>{userData ? userData.intelligence : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-          <Text>{pointData.intelligence}</Text>
+            <Text>{pointData.intelligence}</Text>
           </View>
         </View>
         <View style={styles.attributeContainer}>
           <Text style={styles.label}>Charisma</Text>
           <Text>{userData ? userData.charisma : 'Loading...'}</Text>
           <View style={styles.barContainer}>
-          <Text>{pointData.christma}</Text>
+            <Text>{pointData.christma}</Text>
           </View>
         </View>
       </View>

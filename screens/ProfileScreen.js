@@ -38,7 +38,8 @@ const ProfileScreen = () => {
         intelligence: 1000,
         christma: 1000,
         strength: 1000,
-        health: 1000
+        health: 1000,
+        currentAge: 0
       });
     } catch (error) {
       console.error("Error writing document: ", error);
