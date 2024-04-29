@@ -238,6 +238,7 @@ const Aspect = () => {
             name: data.name,
             email: data.email,
             gender: data.gender,
+            currentAge: data.currentAge,
             happiness: (data.happiness || 0) + inthappiness,
             intelligence: (data.intelligence || 0) + intintelligence,
             christma: (data.christma || 0) + intchristma,
