@@ -1,11 +1,16 @@
 import React, { useState, useRef, useEffect, Children } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions, FlatList, Alert, Modal, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { doc, getFirestore, setDoc, getDoc } from 'firebase/firestore';
+import { doc, getFirestore, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { dummyData } from '../dummyData';
+import { FloatingAction } from "react-native-floating-action";
+import Toast from "react-native-root-toast";
+import { DateTime } from "luxon";
+import ProgressBar from 'react-native-progress/Bar';
 
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get('window').height;
+const { width } = Dimensions.get('window').width;
 
 const Aspect = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,12 +20,11 @@ const Aspect = () => {
   const [loading, setLoading] = useState(true);
   const menuAnimation = useRef(new Animated.Value(-height / 2)).current;
   const [modalVisible, setModalVisible] = useState(false);
+  const [loginDays, setLoginDays] = useState([]);
 
-
-
+  
 
   async function writeUserDatabase() {
-    const db = getFirestore();
     try {
       await setDoc(doc(db, 'users', auth.currentUser.email), {
 
@@ -31,6 +35,44 @@ const Aspect = () => {
       })
     } catch (error) {
       console.error("Error writing document: ", error);
+    }
+  }
+
+
+
+  async function getLoginDays() {
+    const db = getFirestore();
+    const auth = getAuth();
+    const userEmail = auth.currentUser.email;
+  
+    if (!userEmail) {
+      console.log('User not authenticated');
+      return;
+    }
+  
+    const docRef = doc(db, "users", userEmail);
+    const docSnap = await getDoc(docRef);
+  
+    if (docSnap.exists()) {
+      const loginDaysData = docSnap.data().loginDays || [];
+      const today = DateTime.now().toLocaleString();
+  
+      if (!loginDaysData.includes(today)) {
+        console.log('button clicked!')
+        Toast.show('Daily Reward: 500k vnd!', { duration: Toast.durations.LONG });
+        const updatedLoginDays = [...loginDaysData, today];
+  
+        try {
+          await updateDoc(docRef, { loginDays: updatedLoginDays });
+          console.log('Document updated successfully');
+        } catch (error) {
+          console.error('Error updating document:', error);
+        }
+      } else {
+        Toast.show('Daily Rewards claimed', { duration: Toast.durations.LONG });
+      }
+    } else {
+      console.log('No such document!');
     }
   }
 
@@ -66,8 +108,12 @@ const Aspect = () => {
     }
   }
 
-
-
+  
+  const dailyRewardButton = [{
+    icon: require("../assets/icons/dailyRewardButtonIcon.png"),
+    name: "log_in_reward_button",
+    position: 1,
+  }];
 
   useEffect(() => {
     setLoading(false);
@@ -201,6 +247,12 @@ const Aspect = () => {
 
   return (
     <View style={styles.wrap}>
+      <ProgressBar
+        progress={currentIndex} 
+        width={Dimensions.get('window').width}
+        height={20}
+      />
+    
       <View>
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Age: {dummyData.ageoptions[currentIndex].age}</Text>
         <FlatList
@@ -214,7 +266,26 @@ const Aspect = () => {
           )}
           keyExtractor={(activity, index) => index.toString()}
         />
+        {/*daily reward button*/}
+        {/*TO DO: Implement: +50k vnd in onPressItem
+                      Recognize different users  */}
+
+            <FloatingAction
+                actions={dailyRewardButton}
+                onPressItem={
+                    () => {                        
+                        getLoginDays();
+                    }
+                }
+                overrideWithAction={true}
+                color="#ADD8E6"
+                buttonSize={60}
+                iconHeight={30}
+                iconWidth={30}
+                listenKeyboard={true}
+            />
       </View>
+      
       <View style={styles.aspectOverview}>
         <View style={styles.itemContainer}>
           <TouchableOpacity style={styles.career}  onPress={() => toggleMenu('career')}>

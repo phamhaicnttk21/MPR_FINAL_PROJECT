@@ -13,7 +13,6 @@ const auth = getAuth();
 const ProfileScreen = () => {
   const navigation = useNavigation();
 
-
   const [userId, setUserId] = useState(null);
 
   const [name, setName] = useState('Test');
@@ -38,7 +37,8 @@ const ProfileScreen = () => {
         intelligence: 1000,
         christma: 1000,
         strength: 1000,
-        health: 1000
+        health: 1000,
+        loginDays: [],
       });
     } catch (error) {
       console.error("Error writing document: ", error);
