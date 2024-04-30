@@ -7,7 +7,7 @@ import { dummyData } from '../dummyData';
 import { FloatingAction } from "react-native-floating-action";
 import Toast from "react-native-root-toast";
 import { DateTime } from "luxon";
-import ProgressBar from 'react-native-progress/Bar';
+import TwelveMinuteProgressBar from '../components/TwelveMinuteProgressBar';
 
 const { height } = Dimensions.get('window').height;
 const { width } = Dimensions.get('window').width;
@@ -20,7 +20,6 @@ const Aspect = () => {
   const [loading, setLoading] = useState(true);
   const menuAnimation = useRef(new Animated.Value(-height / 2)).current;
   const [modalVisible, setModalVisible] = useState(false);
-
 
   useEffect(() => {
     const fetchUserAge = async () => {
@@ -44,23 +43,6 @@ const Aspect = () => {
 
     fetchUserAge();
   }, []);
-
-  
-
-  async function writeUserDatabase() {
-    try {
-      await setDoc(doc(db, 'users', auth.currentUser.email), {
-
-        name: name,
-        email: auth.currentUser.email,
-        gender: gender,
-
-      })
-    } catch (error) {
-      console.error("Error writing document: ", error);
-    }
-  }
-
 
 
   async function getLoginDays() {
@@ -222,7 +204,8 @@ const Aspect = () => {
           intelligence: data.intelligence,
           christma: data.christma,
           strength: data.strength,
-          health: data.health
+          health: data.health,
+          loginDays: data.loginDays,
         };
         return setDoc(userDocRef, newData);
 
@@ -290,7 +273,8 @@ const Aspect = () => {
             intelligence: (data.intelligence || 0) + intintelligence,
             christma: (data.christma || 0) + intchristma,
             strength: (data.strength || 0) + intstrength,
-            health: (data.health || 0) + inthealth
+            health: (data.health || 0) + inthealth,
+            loginDays: data.loginDays,
           };
           return setDoc(userDocRef, newData);
         } else {
@@ -346,6 +330,7 @@ const Aspect = () => {
           charisma: (data.charisma || 0) + (option.charisma || 0),
           strength: (data.strength || 0) + (option.strength || 0),
           health: data.health || 0,
+          loginDays: data.loginDays,
         };
 
         await setDoc(userDocRef, newData);
@@ -380,6 +365,7 @@ const Aspect = () => {
           charisma: (data.charisma || 0) + (option.charisma || 0),
           strength: (data.strength || 0) + (option.strength || 0),
           health: data.health || 0,
+          loginDays: data.loginDays,
         };
 
         await setDoc(userDocRef, newData);
@@ -414,6 +400,7 @@ const Aspect = () => {
           charisma: (data.charisma || 0) + (option.charisma || 0),
           strength: (data.strength || 0) + (option.strength || 0),
           health: data.health || 0,
+          loginDays: data.loginDays,
         };
 
         await setDoc(userDocRef, newData);
@@ -448,6 +435,7 @@ const Aspect = () => {
           charisma: (data.charisma || 0) + (option.charisma || 0),
           strength: (data.strength || 0) + (option.strength || 0),
           health: data.health || 0,
+          loginDays: data.loginDays,
         };
 
         await setDoc(userDocRef, newData);
@@ -464,11 +452,7 @@ const Aspect = () => {
 
   return (
     <View style={styles.wrap}>
-      <ProgressBar
-        progress={currentIndex} 
-        width={Dimensions.get('window').width}
-        height={20}
-      />
+      <TwelveMinuteProgressBar/>
     
       <View>
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Age: {currentAge}</Text>
@@ -492,24 +476,23 @@ const Aspect = () => {
           )}
           keyExtractor={(activity, index) => index.toString()}
         />
-        {/*daily reward button*/}
-        {/*TO DO: Implement: +50k vnd in onPressItem
-                      Recognize different users  */}
 
-            <FloatingAction
-                actions={dailyRewardButton}
-                onPressItem={
-                    () => {                        
-                        getLoginDays();
-                    }
+        {/*TO DO: Implement: +50k vnd in onPressItem*/}
+        <FloatingAction
+            actions={dailyRewardButton}
+            onPressItem={
+                () => {                        
+                    getLoginDays();
                 }
-                overrideWithAction={true}
-                color="#ADD8E6"
-                buttonSize={60}
-                iconHeight={30}
-                iconWidth={30}
-                listenKeyboard={true}
-            />
+            }
+            overrideWithAction={true}
+            color="#ADD8E6"
+            buttonSize={60}
+            iconHeight={30}
+            iconWidth={30}
+            listenKeyboard={true}
+        />
+        
       </View>
       
       <View style={styles.aspectOverview}>
