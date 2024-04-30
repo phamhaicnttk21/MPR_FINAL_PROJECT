@@ -1,52 +1,55 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground, TextInput} from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ImageBackground, TextInput } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { doc, setDoc, getFirestore, collection, getDoc } from 'firebase/firestore';
 import SelectDropdown from 'react-native-select-dropdown';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Example using FontAwesome icons
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { getAuth } from "firebase/auth";
+import storage from '@react-native-firebase/storage';
+import firebase from '@react-native-firebase/app';
 
-import { useNavigation } from '@react-navigation/native'; 
+import { useNavigation } from '@react-navigation/native';
 
 const auth = getAuth();
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
 
-
   const [userId, setUserId] = useState(null);
-
   const [name, setName] = useState('Test');
   const [gender, setGender] = useState(null);
-  const [avatar, setAvatar] = useState(require('../assets/img/tomcruise.jpg')); // Make sure you have this image in your assets
+  const [avatar, setAvatar] = useState(null);
+  const [background, setBackground] = useState(null);
 
   const genderPickerData = [
-    {title: 'Male'},
-    {title: 'Female'},
-    {title: 'Non-binary'},
-  ]
+    { title: 'Male' },
+    { title: 'Female' },
+    { title: 'Non-binary' },
+  ];
 
   async function writeUserDatabase() {
     const db = getFirestore();
-  
+
     try {
       await setDoc(doc(db, 'users', auth.currentUser.email), {
         name: name,
         email: auth.currentUser.email,
         gender: gender,
+        avatar: avatar,
+        currentAge: 0,
+        background: background,
         happiness: 1000,
         intelligence: 1000,
         christma: 1000,
         strength: 1000,
-        health: 1000,
-        currentAge: 0
+        health: 1000
       });
     } catch (error) {
       console.error("Error writing document: ", error);
     }
   }
 
-  const selectAvatar = () => {
+  const selectAvatar = async () => {
     const options = {
       mediaType: 'photo',
       quality: 1,
@@ -58,8 +61,45 @@ const ProfileScreen = () => {
       } else if (response.error) {
         console.log('ImagePicker Error: ', response.error);
       } else if (response.assets && response.assets.length > 0) {
-        const source = { uri: response.assets[0].uri };
-        setAvatar(source);
+        const source = response.assets[0];
+        const reference = storage().ref(`/avatars/${auth.currentUser.uid}/${source.fileName}`);
+        console.log(reference);
+
+        reference.putFile(source.uri)
+          .then(() => reference.getDownloadURL())
+          .then((avatarUrl) => {
+            setAvatar(avatarUrl);
+          })
+          .catch((error) => {
+            console.log('Error uploading avatar:', error);
+          });
+      }
+    });
+  };
+
+  const selectBackground = async () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.assets && response.assets.length > 0) {
+        const source = response.assets[0];
+        const reference = storage().ref(`/backgrounds/${auth.currentUser.uid}/${source.fileName}`);
+
+        reference.putFile(source.uri)
+          .then(() => reference.getDownloadURL())
+          .then((backgroundUrl) => {
+            setBackground(backgroundUrl);
+          })
+          .catch((error) => {
+            console.log('Error uploading background:', error);
+          });
       }
     });
   };
@@ -72,10 +112,10 @@ const ProfileScreen = () => {
     const docRef = doc(db, 'users', auth.currentUser.email);
     getDoc(docRef).then((doc) => {
       if (doc.exists()) {
-        Alert.alert('Profile Updated', 
-        `Your profile information has been updated successfully.`,
-        [{text:'Start Game', onPress: () => {navigation.navigate('Home')}}],
-      );
+        Alert.alert('Profile Updated',
+          `Your profile information has been updated successfully.`,
+          [{ text: 'Start Game', onPress: () => { navigation.navigate('Home') } }],
+        );
       } else {
         console.log(`Can't create profile`);
       }
@@ -83,9 +123,8 @@ const ProfileScreen = () => {
       console.error(error);
       Alert.alert('Error', error);
     });
-    
-    
   };
+
   const handlePlayGame = () => {
     // Navigate to Aspect screen
     navigation.navigate('Aspect');
@@ -93,24 +132,24 @@ const ProfileScreen = () => {
 
   return (
     <ImageBackground
-      source={require('../assets/img/tomcruise.jpg')}
+      source={{ uri: background }}
       style={styles.background}
     >
       <View style={styles.overlay}>
         <TouchableOpacity onPress={selectAvatar} style={styles.avatarContainer}>
-          <Image source={avatar} style={styles.avatar} />
+          <Image source={{ uri: avatar }} style={styles.avatar} />
         </TouchableOpacity>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Name</Text>
-          <TextInput 
+          <TextInput
             style={styles.input}
-            onChangeText={text => setName(text)}>        
+            onChangeText={text => setName(text)}>
           </TextInput>
 
           <Text style={styles.label}>Gender</Text>
           <SelectDropdown
-            data = {genderPickerData}
+            data={genderPickerData}
             onSelect={(selectedItem, index) => {
               setGender(selectedItem.title);
             }}
@@ -125,14 +164,14 @@ const ProfileScreen = () => {
               );
             }}
             renderItem={(item, index, isSelected) => {
-              return(
-                <View style={{...styles.dropdownItemStyle, ...(isSelected && {backgroundColor: '#D2D9DF'})}}>                 
+              return (
+                <View style={{ ...styles.dropdownItemStyle, ...(isSelected && { backgroundColor: '#D2D9DF' }) }}>
                   <Text style={styles.dropdownItemTxtStyle}>{item.title}</Text>
                 </View>
               )
             }}
             showsVerticalScrollIndicator={true}
-            dropdownStyle = {styles.dropdownMenuStyle}
+            dropdownStyle={styles.dropdownMenuStyle}
           />
 
         </View>
@@ -141,7 +180,7 @@ const ProfileScreen = () => {
           <Text style={styles.buttonText}>Update Profile</Text>
         </TouchableOpacity>
 
-        
+
       </View>
     </ImageBackground>
   );
@@ -151,8 +190,8 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: 'cover',
-    width:"100%",
-    height:"25%"
+    width: "100%",
+    height: "25%"
   },
   overlay: {
     flex: 1,
@@ -169,7 +208,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 120,
     height: 120,
-    borderRadius:100
+    borderRadius: 100
   },
   inputGroup: {
     width: '90%',
@@ -221,7 +260,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#151E26',
   },
-  dropdownButtonStyle: {    
+  dropdownButtonStyle: {
     height: 50,
     backgroundColor: 'white',
     borderRadius: 60,
@@ -234,7 +273,7 @@ const styles = StyleSheet.create({
   },
   dropdownButtonTxtStyle: {
     flex: 1,
-    fontSize: 16,    
+    fontSize: 16,
     color: '#151E26',
   },
   dropdownButtonArrowStyle: {

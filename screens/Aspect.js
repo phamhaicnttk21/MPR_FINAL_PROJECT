@@ -125,11 +125,9 @@ const Aspect = () => {
     return (
       <View style={styles.menuContent}>
         {options.map((option) => (
-          <TouchableOpacity key={option.id} >
+          <TouchableOpacity key={option.id} onPress={() => handlePress(option)}>
             <View style={styles.menuOptionContainer}>
-              <Text style={styles.menuOptionText}>
-                {option.option}
-              </Text>
+              <Text style={styles.menuOptionText}>{option.option}</Text>
               {selectedOptions.includes(option.id) && (
                 <TouchableOpacity onPress={() => removeOption(option.id)}>
                   <FontAwesome name="times-circle" size={20} color="red" />
@@ -150,7 +148,7 @@ const Aspect = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentAge(currentAge => (currentAge + 1) % dummyData.ageoptions.length);
-    }, 5000);
+    }, 1200 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -166,6 +164,9 @@ const Aspect = () => {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
         const newAge = data.currentAge + 1;
+        if (newAge > 100) {
+          newAge = 0;
+        }
         const newData = {
           name: data.name,
           email: data.email,
@@ -259,9 +260,159 @@ const Aspect = () => {
         console.error("Error updating document: ", error);
       });
   };
-  const handlePress = async () => {
-    await updateUserPoints(option);
-    onPress();
+  const handlePress = async (option) => {
+    switch (menuType) {
+      case 'career':
+        await handleCareerPress(option);
+        break;
+      case 'social':
+        await handleSocialPress(option);
+        break;
+      case 'finance':
+        await handleFinancePress(option);
+        break;
+      case 'activities':
+        await handleActivitiesPress(option);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleCareerPress = async (option) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', user.email);
+
+    try {
+      const docSnapshot = await getDoc(userDocRef);
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+
+        const newData = {
+          name: data.name,
+          email: data.email,
+          gender: data.gender,
+          currentAge: data.currentAge,
+          happiness: (data.happiness || 0) + (option.happiness || 0),
+          intelligence: (data.intelligence || 0) + (option.intelligence || 0),
+          charisma: (data.charisma || 0) + (option.charisma || 0),
+          strength: (data.strength || 0) + (option.strength || 0),
+          health: data.health || 0,
+        };
+
+        await setDoc(userDocRef, newData);
+        console.log("Document successfully updated!");
+        readData(); // Call the readData function to fetch the updated data
+      } else {
+        console.log("User document does not exist");
+      }
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
+  };;
+
+  const handleSocialPress = async (option) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', user.email);
+
+    try {
+      const docSnapshot = await getDoc(userDocRef);
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+
+        const newData = {
+          name: data.name,
+          email: data.email,
+          gender: data.gender,
+          currentAge: data.currentAge,
+          happiness: (data.happiness || 0) + (option.happiness || 0),
+          intelligence: (data.intelligence || 0) + (option.intelligence || 0),
+          charisma: (data.charisma || 0) + (option.charisma || 0),
+          strength: (data.strength || 0) + (option.strength || 0),
+          health: data.health || 0,
+        };
+
+        await setDoc(userDocRef, newData);
+        console.log("Document successfully updated!");
+        readData(); // Call the readData function to fetch the updated data
+      } else {
+        console.log("User document does not exist");
+      }
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
+  };
+
+  const handleFinancePress = async (option) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', user.email);
+
+    try {
+      const docSnapshot = await getDoc(userDocRef);
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+
+        const newData = {
+          name: data.name,
+          email: data.email,
+          gender: data.gender,
+          currentAge: data.currentAge,
+          happiness: (data.happiness || 0) + (option.happiness || 0),
+          intelligence: (data.intelligence || 0) + (option.intelligence || 0),
+          charisma: (data.charisma || 0) + (option.charisma || 0),
+          strength: (data.strength || 0) + (option.strength || 0),
+          health: data.health || 0,
+        };
+
+        await setDoc(userDocRef, newData);
+        console.log("Document successfully updated!");
+        readData(); // Call the readData function to fetch the updated data
+      } else {
+        console.log("User document does not exist");
+      }
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
+  };
+
+  const handleActivitiesPress = async (option) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', user.email);
+
+    try {
+      const docSnapshot = await getDoc(userDocRef);
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+
+        const newData = {
+          name: data.name,
+          email: data.email,
+          gender: data.gender,
+          currentAge: data.currentAge,
+          happiness: (data.happiness || 0) + (option.happiness || 0),
+          intelligence: (data.intelligence || 0) + (option.intelligence || 0),
+          charisma: (data.charisma || 0) + (option.charisma || 0),
+          strength: (data.strength || 0) + (option.strength || 0),
+          health: data.health || 0,
+        };
+
+        await setDoc(userDocRef, newData);
+        console.log("Document successfully updated!");
+        readData(); // Call the readData function to fetch the updated data
+      } else {
+        console.log("User document does not exist");
+      }
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
   };
 
 
@@ -325,24 +476,26 @@ const Aspect = () => {
                   <OptionButton
                     key={option.id}
                     option={option}
-                    onPress={() => handleOptionPress(option)}
+                    onPress={() => handleCareerPress(option)}
                   />
                 ))}
                 {dummyData.social.map((option) => (
-                  <Text key={option.id} style={styles.menuOptionText}>
-                    {option.option}
-                  </Text>
+                  <OptionButton
+                    key={option.id}
+                    option={option}
+                    onPress={() => handleSocialPress(option)}
+                  />
                 ))}
-                {dummyData.finance.map((option) => (
-                  <Text key={option.id} style={styles.menuOptionText}>
-                    {option.option}
-                  </Text>
-                ))}
-                {dummyData.activities.map((option) => (
-                  <Text key={option.id} style={styles.menuOptionText}>
-                    {option.option}
-                  </Text>
-                ))}
+                <OptionButton
+                  key={option.id}
+                  option={option}
+                  onPress={() => handleFinancePress(option)}
+                />
+                <OptionButton
+                  key={option.id}
+                  option={option}
+                  onPress={() => handleActivitiesPress(option)}
+                />
 
               </View>
             ) : renderMenuContent()}
